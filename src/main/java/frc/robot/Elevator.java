@@ -29,13 +29,13 @@ public class Elevator {
     Clarification on the current limit if used as above: it should break the loop and allow manual control of the elevator
     */
     public boolean resetElevator() {
-        if (motor.getStatorCurrent() > 40) { // Check if its getStatorCurrent or getSupplyCurrent with electrical before running
+        if (motor.getStatorCurrent() < 40) { // Check if its getStatorCurrent or getSupplyCurrent with electrical before running
             if (!bottomLimitSensor.get() && motor.getSelectedSensorPosition() < 20000) {
                 motor.set(TalonFXControlMode.PercentOutput, 0.5);
                 isElevatorReset = false;
                 return false;
             } else if (!bottomLimitSensor.get() && motor.getSelectedSensorPosition() > 20000) {
-                motor.setSelectedSensorPosition(3000);
+                motor.setSelectedSensorPosition(30000);
                 motor.set(TalonFXControlMode.PercentOutput, -0.5);
                 isElevatorReset = false;
                 return false;
@@ -61,8 +61,12 @@ public class Elevator {
         if (motor.getStatorCurrent() < 40) { //Check if its stator current or supply current with electrical like above
             if (isElevatorReset == true || elevatorDriveOverride == true){
                 if ((!topLimitSensor.get() || percentOutput < 0) && (motor.getSelectedSensorPosition() > 0 || percentOutput > 0)) {
-                    motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * Math.min(motor.getSelectedSensorPosition(), topSensorPosition - motor.getSelectedSensorPosition()) * kP,-1, 1));
-                } // should just check the one where it going close to, not the closest on in the math.min - fix later
+                    if (percentOutput > 0) {
+                        motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * (topSensorPosition - motor.getSelectedSensorPosition() * kP),-1, 1));
+                    } else {
+                        motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * motor.getSelectedSensorPosition() * kP, -1, 1));
+                    }
+                }
             }
         }
     }
