@@ -9,13 +9,14 @@ public class Elevator {
 
     private DigitalInput bottomLimitSensor = new DigitalInput(0);
     private DigitalInput topLimitSensor = new DigitalInput(1);
-    private TalonFX motor = new TalonFX(0);
     private boolean isElevatorReset = false;
     private boolean elevatorDriveOverride = false;
+    private TalonFX motor;
     private double kP = 0.00005;
     private double topSensorPosition = 300000; // Change this once we find how many ticks the top sensor is from the bottom
 
-    public Elevator() {
+    public Elevator(int port) {
+        motor = new TalonFX(port);
         motor.setSelectedSensorPosition(0);
     }
 
@@ -55,6 +56,10 @@ public class Elevator {
     // allows override to the motor, ignoring the isElevatorReset boolean
     public void setOverride(boolean override) {
         elevatorDriveOverride = override;
+    }
+
+    public boolean getOverride() {
+        return elevatorDriveOverride;
     }
 
     public void moveElevator(double percentOutput) {

@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
 public class Shooter {
-    private CANSparkMax topMotor = new CANSparkMax(1, MotorType.kBrushless);
-    private CANSparkMax bottomMotor = new CANSparkMax(2, MotorType.kBrushless);
+    private CANSparkMax topMotor;
+    private CANSparkMax bottomMotor;
     private SparkMaxPIDController topMotorPID = topMotor.getPIDController();
     private SparkMaxPIDController bottomMotorPID = bottomMotor.getPIDController();
     private double kP = 0.4;
@@ -17,7 +17,9 @@ public class Shooter {
 
     private Solenoid shooterSolenoid = new Solenoid(PneumaticsModuleType.REVPH, 0);
 
-    public Shooter() {
+    public Shooter(int topMotorPort, int bottomMotorPort) {
+        topMotor = new CANSparkMax(topMotorPort, MotorType.kBrushless);
+        bottomMotor = new CANSparkMax(bottomMotorPort, MotorType.kBrushless);
         topMotor.restoreFactoryDefaults();
         bottomMotor.restoreFactoryDefaults();
         
@@ -37,4 +39,10 @@ public class Shooter {
     public void setShooter(boolean isShooterUp) {
         shooterSolenoid.set(isShooterUp);
     }
+
+    public boolean getShooterSolenoid() {
+        return shooterSolenoid.get();
+    }
+
+    //maybe add a setPID function
 }
