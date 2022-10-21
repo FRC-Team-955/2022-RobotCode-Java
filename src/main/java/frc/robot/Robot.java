@@ -31,7 +31,9 @@ public class Robot extends TimedRobot {
   Timer timer = new Timer();
   XboxController Xbox = new XboxController(0);
   Elevator elevator = new Elevator(0); //check port before running
-  Shooter shooter = new Shooter(0, 1);
+  Shooter shooter = new Shooter(8, 7);
+  Intake intake = new Intake();
+
 
   @Override
   public void robotInit() {}
@@ -81,6 +83,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    intake.open();
+  
     //elevator test code
     /*
     if(state == 0) {
@@ -98,7 +102,7 @@ public class Robot extends TimedRobot {
     //Shooter test code
     shooter.setShooterRPMs(1000, 1000);
     if(Xbox.getAButtonPressed()) {
-      shooter.setShooter(!shooter.getShooterSolenoid());
+      shooter.switchShooterSolenoid();
     }
   }
 

@@ -3,23 +3,26 @@ package frc.robot;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController;
-import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 
 public class Shooter {
     private CANSparkMax topMotor;
     private CANSparkMax bottomMotor;
-    private SparkMaxPIDController topMotorPID = topMotor.getPIDController();
-    private SparkMaxPIDController bottomMotorPID = bottomMotor.getPIDController();
-    private double kP = 0.4;
-    private double kI = 0.003;
-    private double kD = 0.002;
+    private SparkMaxPIDController topMotorPID;
+    private SparkMaxPIDController bottomMotorPID;
+    private double kP = 0.0002;
+    private double kI = 0.00002;
+    private double kD = 0;
+    private double kFF = 0.002;
 
-    private Solenoid shooterSolenoid = new Solenoid(PneumaticsModuleType.REVPH, 0);
+    private DoubleSolenoid shooterSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 3, 4);
 
     public Shooter(int topMotorPort, int bottomMotorPort) {
         topMotor = new CANSparkMax(topMotorPort, MotorType.kBrushless);
         bottomMotor = new CANSparkMax(bottomMotorPort, MotorType.kBrushless);
+        topMotorPID = topMotor.getPIDController();
+        bottomMotorPID = bottomMotor.getPIDController();
         topMotor.restoreFactoryDefaults();
         bottomMotor.restoreFactoryDefaults();
         
@@ -28,7 +31,8 @@ public class Shooter {
         topMotorPID.setI(kI);
         bottomMotorPID.setI(kI);
         topMotorPID.setD(kD);
-        bottomMotorPID.setD(kD);
+        topMotorPID.setFF(kFF);
+        bottomMotorPID.setFF(kFF);
     }
 
     public void setShooterRPMs(double topShooterVelocity, double bottomShooterVelocity) {
@@ -36,13 +40,7 @@ public class Shooter {
         bottomMotorPID.setReference(bottomShooterVelocity, CANSparkMax.ControlType.kVelocity);
     }
 
-    public void setShooter(boolean isShooterUp) {
-        shooterSolenoid.set(isShooterUp);
+    public void switchShooterSolenoid() {
+        shooterSolenoid.toggle();
     }
-
-    public boolean getShooterSolenoid() {
-        return shooterSolenoid.get();
-    }
-
-    //maybe add a setPID function
 }
