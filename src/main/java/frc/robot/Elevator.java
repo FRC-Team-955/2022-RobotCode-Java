@@ -2,6 +2,10 @@ package frc.robot;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 
@@ -14,6 +18,7 @@ public class Elevator {
     private TalonFX motor;
     private double kP = 0.00005;
     private double topSensorPosition = 300000; // Change this once we find how many ticks the top sensor is from the bottom
+    private DoubleSolenoid elevatorSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 0, 1);
 
     public Elevator(int port) {
         motor = new TalonFX(port);
@@ -61,18 +66,41 @@ public class Elevator {
     public boolean getOverride() {
         return elevatorDriveOverride;
     }
+    public void switchElevatorSolenoid() {
+        boolean isElevatorMoving;
+        if (motor.getMotorOutputPercent() > 0 || motor.getMotorOutputPercent() < 0) {
+            isElevatorMoving = true;
+        } else {
+            isElevatorMoving = false;
+        }
+        if (isElevatorMoving == false) {
+            elevatorSolenoid.toggle();
+        }
 
-    public void moveElevator(double percentOutput) {
-        if (motor.getStatorCurrent() < 40) { //Check if its stator current or supply current with electrical like above
-            if (isElevatorReset == true || elevatorDriveOverride == true){
-                if ((!topLimitSensor.get() || percentOutput < 0) && (motor.getSelectedSensorPosition() > 0 || percentOutput > 0)) {
-                    if (percentOutput > 0) {
-                        motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * (topSensorPosition - motor.getSelectedSensorPosition() * kP),-1, 1));
-                    } else {
-                        motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * motor.getSelectedSensorPosition() * kP, -1, 1));
-                    }
-                }
-            }
+    }
+    public boolean isElevatorSolenoidOut() {
+        if (elevatorSolenoid.get() == Value.kForward) {
+            return true;
+        } else {
+            return false;
         }
     }
+    public void moveElevator(double percentOutput) {
+            if (motor.getStatorCurrent() < 40 && isElevatorSolenoidOut() == false) { //Check if its stator current or supply current with electrical like above
+                if (isElevatorReset == true || elevatorDriveOverride == true ){
+                    if ((!topLimitSensor.get() || percentOutput < 0) && (motor.getSelectedSensorPosition() > 0 || percentOutput > 0)) {
+                        if (percentOutput > 0) {
+                            motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * (topSensorPosition - motor.getSelectedSensorPosition() * kP),-1, 1));
+                            switchElevatorSolenoid();
+                        } else {
+                            motor.set(TalonFXControlMode.PercentOutput, MathUtil.clamp(percentOutput * motor.getSelectedSensorPosition() * kP, -1, 1));
+                            switchElevatorSolenoid();
+                            }
+                    }
+                }
+            } else {
+                motor.set(TalonFXControlMode.PercentOutput, 0);
+                }
+    }    
+    
 }

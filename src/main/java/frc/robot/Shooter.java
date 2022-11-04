@@ -6,7 +6,6 @@ import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import frc.robot.Limelight;
 
 public class Shooter {
     private CANSparkMax topMotor;
@@ -17,6 +16,9 @@ public class Shooter {
     private double kI = 0.00002;
     private double kD = 0;
     private double kFF = 0.002;
+    Limelight limelight = new Limelight();
+
+
 
     private DoubleSolenoid shooterSolenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, 3, 4);
 
@@ -46,21 +48,28 @@ public class Shooter {
         shooterSolenoid.toggle();
     }
     
+   
    public double setSpeedByRange(double range) {
-        if (shooterSolenoid.get() == Value.kForward) {
-            double forwardSpeed;
-            forwardSpeed = Math.pow(rangeOfTargets(), 2);
-            return forwardSpeed;
-            
+       if (range < 20) {
+           if (shooterSolenoid.get() == Value.kReverse) {
+            return limelight.speedDown();
+           } else {
+               shooterSolenoid.toggle();
+               return limelight.speedDown();
+           }
+       }
 
-        }
-        if (shooterSolenoid.get() == Value.kReverse) {
-            double forwardSpeed;
-            forwardSpeed = Math.pow(rangeOfTargets(), 3);
-            return forwardSpeed;
-            
+       if (range > 20) {
+        if (shooterSolenoid.get() == Value.kForward) {
+            return limelight.speedUp();
         } else {
-            return -1;
+            shooterSolenoid.toggle();
+            return limelight.speedUp();
         }
+       } else {
+           return -1;
+       }
+    
+
     }
 }
