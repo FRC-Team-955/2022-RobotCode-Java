@@ -5,6 +5,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.SparkMaxPIDController;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import frc.robot.Limelight;
 
 public class Shooter {
     private CANSparkMax topMotor;
@@ -42,5 +44,23 @@ public class Shooter {
 
     public void switchShooterSolenoid() {
         shooterSolenoid.toggle();
+    }
+    
+   public double setSpeedByRange(double range) {
+        if (shooterSolenoid.get() == Value.kForward) {
+            double forwardSpeed;
+            forwardSpeed = Math.pow(rangeOfTargets(), 2);
+            return forwardSpeed;
+            
+
+        }
+        if (shooterSolenoid.get() == Value.kReverse) {
+            double forwardSpeed;
+            forwardSpeed = Math.pow(rangeOfTargets(), 3);
+            return forwardSpeed;
+            
+        } else {
+            return -1;
+        }
     }
 }
